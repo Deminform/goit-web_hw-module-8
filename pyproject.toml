@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "python-web-module-8"
+version = "0.1.0"
+description = ""
+authors = ["Deminform <deminform@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pymongo = "^4.10.1"
+mongoengine = "^0.29.1"
+redis = "^5.1.0"
+redis-lru = "^0.1.2"
+pika = "^1.3.2"
+pika-stubs = "^0.1.3"
+celery = "^5.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
