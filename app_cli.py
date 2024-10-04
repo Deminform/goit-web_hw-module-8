@@ -1,11 +1,7 @@
 import argparse
 import json
-
 import connect
-
-from bson.objectid import ObjectId
-from mongoengine import DateTimeField, ListField, ReferenceField, StringField, Document
-
+from models import Author, Quote
 
 parser = argparse.ArgumentParser(description='Python Web / Homework / Module 8')
 parser.add_argument('--action', help='create, update, read, delete, upload')
@@ -34,19 +30,6 @@ author = arg.get('author')
 tags = arg.get('tags')
 
 
-class Author(Document):
-    fullname = StringField(max_length=120, required=True)
-    born_date = DateTimeField(required=True)
-    born_location = StringField()
-    description = StringField()
-
-
-class Quote(Document):
-    quote = StringField(required=True)
-    author = ReferenceField(Author)
-    tags = ListField(required=True)
-
-
 def upload_from_file(filepath, model):
     result = []
     with open(filepath, 'r', encoding='utf-8') as file:
@@ -71,30 +54,30 @@ def upload_from_file(filepath, model):
 
 
 def find(model):
-    result = Author.objects.all() if model == 'author' else Author.objects.all()
-    return result
+    if model == 'author':
+        return Author.objects.all()
+    elif model == 'quote':
+        return Quote.objects.all()
 
 
 def create(model, fullname='', born_date='', born_location='', description='', quote='', author='', tags=''):
     if model == 'author':
-        result = Author(fullname=fullname, born_date=born_date, born_location=born_location, description=description).save()
-        return result
+        return Author(fullname=fullname, born_date=born_date, born_location=born_location, description=description).save()
+
     elif model == 'quote':
-        result = Quote(quote=quote, author=Author.objects(fullname=author).first(), tags=tags).save()
-        return result
+        return Quote(quote=quote, author=Author.objects(fullname=author).first(), tags=tags).save()
 
 
 def update(pk, model, fullname='', born_date='', born_location='', description='', quote='', author='', tags=''):
     if model == 'author':
         obj = Author.objects(id=pk).first()
         if obj:
-            Author(fullname=fullname, born_date=born_date, born_location=born_location, description=description).reload()
-        return obj
+            return Author(fullname=fullname, born_date=born_date, born_location=born_location, description=description).reload()
     if model == 'quote':
         obj = Quote.objects(id=pk).first()
         if obj:
-            Quote(quote=quote, author=Author.objects(fullname=author).first(), tags=tags).reload()
-        return obj
+            return Quote(quote=quote, author=Author.objects(fullname=author).first(), tags=tags).reload()
+    return None
 
 
 def delete(pk, model):
