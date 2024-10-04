@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 
 from bson import ObjectId
 
@@ -64,12 +65,22 @@ def find_all(model):
 
 
 def find_by_name(argument):
-    result = Author.objects(fullname=argument).first()
+    result = Author.objects(fullname__istartswith=argument).first()
     return Quote.objects(author=ObjectId(result.id)).all()
+#
+#
+# def find_by_name(argument):
+#     result = Author.objects(fullname=argument).first()
+#     return Quote.objects(author=ObjectId(result.id)).all()
+
+#
+# def find_by_symbols(argument):
+#     return Quote.objects(tags__contains=argument).all()
 
 
 def find_by_tag(argument):
-    return Quote.objects(tags=argument).all()
+    regex = re.compile(f'^{argument}.*')
+    return Quote.objects(tags=regex).all()
 
 
 def find_by_tags(argument):
