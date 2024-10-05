@@ -1,18 +1,19 @@
 import argparse
 import json
 import re
-import redis
 
-from conf import connect
-from redis_lru import RedisLRU
+import redis
 from bson import ObjectId
-from conf.models import Author, Quote
+from redis_lru import RedisLRU
+
+from models import Author, Quote
+
 
 client = redis.StrictRedis(host="localhost", port=6379, password=None)
 cache = RedisLRU(client)
 
 parser = argparse.ArgumentParser(description='Python Web / Homework / Module 8')
-parser.add_argument('--action', help='create, update, read, delete, upload', metavar='')
+parser.add_argument('--action', help='create, update, read, delete, upload',  metavar='')
 parser.add_argument('--model', help='author, quote', metavar='')
 parser.add_argument('--id', metavar='')
 parser.add_argument('--fullname', metavar='')
@@ -72,15 +73,6 @@ def find_all(model):
 def find_by_name(argument):
     result = Author.objects(fullname__istartswith=argument).first()
     return Quote.objects(author=ObjectId(result.id)).all()
-#
-#
-# def find_by_name(argument):
-#     result = Author.objects(fullname=argument).first()
-#     return Quote.objects(author=ObjectId(result.id)).all()
-
-#
-# def find_by_symbols(argument):
-#     return Quote.objects(tags__contains=argument).all()
 
 
 @cache
@@ -159,21 +151,22 @@ def main():
         result = upload_from_file(filepath, model)
         print(result) if result else None
     else:
-        while True:
-            command = input('Enter a command or type "exit" or keep empty to exit: ')
-            command, argument = command.split(':', 1) if command else exit(0)
-            match command:
-                case 'name':
-                    quotes = find_by_name(argument.strip())
-                    print([el.to_mongo().to_dict() for el in quotes])
-                case 'tag':
-                    quotes = find_by_tag(argument.strip())
-                    print([el.to_mongo().to_dict() for el in quotes])
-                case 'tags':
-                    quotes = find_by_tags((argument.split(',')))
-                    print([el.to_mongo().to_dict() for el in quotes])
-                case 'exit':
-                    break
+        if input('Do you want to activate detach mode? (y/n): ') in ['y', 'Y']:
+            while True:
+                command = input('Enter a command or type "exit" or keep empty to exit: ')
+                command, argument = command.split(':', 1) if len(command.split(':')) > 1 else exit(0)
+                match command:
+                    case 'name':
+                        quotes = find_by_name(argument.strip())
+                        print([el.to_mongo().to_dict() for el in quotes])
+                    case 'tag':
+                        quotes = find_by_tag(argument.strip())
+                        print([el.to_mongo().to_dict() for el in quotes])
+                    case 'tags':
+                        quotes = find_by_tags((argument.split(',')))
+                        print([el.to_mongo().to_dict() for el in quotes])
+                    case 'exit':
+                        break
 
 
 if __name__ == '__main__':

@@ -1,27 +1,48 @@
-import json
-import time
-from datetime import datetime
+import random
 import pika
+from faker import Faker
+from model import Subscriber
+
 
 credentials = pika.PlainCredentials('guest', 'guest')
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', port=5672, credentials=credentials))
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    host='localhost',
+    port=5672,
+    credentials=credentials))
 channel = connection.channel()
 
-channel.exchange_declare(exchange='HW_Module_8', exchange_type='direct')
-channel.queue_declare(queue='hw_queue', durable=True)
-channel.queue_bind(exchange='HW_Module_8', queue='hw_queue')
+fake = Faker()
+exchange = 'Change of conditions'
+queue_sms = 'phone_number'
+queue_email = 'email'
 
 
-def create_task(nums: int):
+channel.exchange_declare(exchange=exchange, exchange_type='direct')
+channel.queue_declare(queue=queue_sms, durable=True)
+channel.queue_declare(queue=queue_email, durable=True)
+channel.queue_bind(exchange=exchange, queue=queue_sms)
+channel.queue_bind(exchange=exchange, queue=queue_email)
+
+
+def notify_all(nums: int):
     for i in range(nums):
-        time.sleep(0.5)
-        message = {
-            'id': i,
-            'payload': f'Date: {datetime.now().isoformat()}',
-        }
-        channel.basic_publish(exchange='HW_Module_8', routing_key='hw_queue', body=json.dumps(message).encode('utf-8'))
+        notification = Subscriber(
+            fullname=fake.name(),
+            email=fake.email(),
+            phone_number=str(fake.basic_phone_number()),
+            notify_method=random.sample(['email', 'phone_number'], k=random.randint(1, 2)),
+        ).save()
+
+        for queue in notification.notify_method:
+            channel.basic_publish(
+                exchange=exchange,
+                routing_key=queue,
+                body=str(notification.id).encode(),
+                properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
+            )
+        print(f' [v] Notification {i} sent')
     connection.close()
 
 
 if __name__ == '__main__':
-    create_task(100)
+    notify_all(30)

@@ -1,5 +1,5 @@
-from bson.objectid import ObjectId
 from mongoengine import DateTimeField, ListField, ReferenceField, StringField, Document
+from conf import connect
 
 
 class Author(Document):
