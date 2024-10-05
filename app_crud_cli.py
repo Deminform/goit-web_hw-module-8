@@ -1,12 +1,15 @@
 import argparse
 import json
 import re
-
-from bson import ObjectId
+import redis
 
 from conf import connect
-
+from redis_lru import RedisLRU
+from bson import ObjectId
 from conf.models import Author, Quote
+
+client = redis.StrictRedis(host="localhost", port=6379, password=None)
+cache = RedisLRU(client)
 
 parser = argparse.ArgumentParser(description='Python Web / Homework / Module 8')
 parser.add_argument('--action', help='create, update, read, delete, upload', metavar='')
@@ -57,6 +60,7 @@ def upload_from_file(filepath, model):
     return result
 
 
+@cache
 def find_all(model):
     if model == 'author':
         return Author.objects.all()
@@ -64,6 +68,7 @@ def find_all(model):
         return Quote.objects.all()
 
 
+@cache
 def find_by_name(argument):
     result = Author.objects(fullname__istartswith=argument).first()
     return Quote.objects(author=ObjectId(result.id)).all()
@@ -78,11 +83,13 @@ def find_by_name(argument):
 #     return Quote.objects(tags__contains=argument).all()
 
 
+@cache
 def find_by_tag(argument):
     regex = re.compile(f'^{argument}.*')
     return Quote.objects(tags=regex).all()
 
 
+@cache
 def find_by_tags(argument):
     return Quote.objects(tags__in=argument).all()
 
