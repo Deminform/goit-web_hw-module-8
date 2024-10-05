@@ -1,5 +1,5 @@
 from mongoengine import DateTimeField, ListField, ReferenceField, StringField, Document
-from conf import connect
+from conf.connect import connect
 
 
 class Author(Document):

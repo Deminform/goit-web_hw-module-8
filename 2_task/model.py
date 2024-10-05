@@ -1,5 +1,5 @@
 from mongoengine import BooleanField, DateTimeField, ListField, ReferenceField, StringField, Document
-from connect import connect
+from conf.connect import connect
 
 
 class Subscriber(Document):

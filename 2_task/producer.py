@@ -40,9 +40,8 @@ def notify_all(nums: int):
                 body=str(notification.id).encode(),
                 properties=pika.BasicProperties(delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE)
             )
-        print(f' [v] Notification {i} sent')
     connection.close()
 
 
 if __name__ == '__main__':
-    notify_all(30)
+    notify_all(40)

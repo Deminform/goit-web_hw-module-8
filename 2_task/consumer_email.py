@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 import pika
-from conf.model import Subscriber
+from model import Subscriber
 
 
 def main():
@@ -21,11 +21,10 @@ def main():
         pk = body.decode()
         notify = Subscriber.objects(id=pk, email_sent=False, notify_method=queue).first()
         if notify:
-            result = notify.update(
+            notify.update(
                 set__email_sent=True,
                 push__notify_date={queue: datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             )
-            print(f' [*] Done with {pk} / Result = {result}')
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=1)
