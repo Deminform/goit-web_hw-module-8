@@ -4,6 +4,7 @@ from conf.connect import connect
 
 class Subscriber(Document):
     fullname = StringField(max_length=120, required=True)
+    message = StringField(required=True)
     email = StringField(max_length=254, required=True)
     email_sent = BooleanField(default=False)
     phone_number = StringField(max_length=20, required=True)
