@@ -39,6 +39,11 @@ author = arg.get('author')
 tags = arg.get('tags')
 
 
+def clear_all_cache():
+    connect.client.flushall()
+    print("All caches cleared!")
+
+
 @error_decorator
 def upload_from_file(filepath, model):
     result = []
@@ -161,6 +166,7 @@ def main():
                                 author=author,
                                 tags=tags)
                 print(result.to_mongo().to_dict())
+            clear_all_cache()
         elif action == 'update':
             if model == 'author':
                 result = update(pk=pk,
@@ -177,11 +183,13 @@ def main():
                                 author=author,
                                 tags=tags)
                 print(result)
+            clear_all_cache()
         elif action == 'read':
             result = find_all(model)
             print([e.to_mongo().to_dict() for e in result])
         elif action == 'delete':
             result = delete(pk, model)
+            clear_all_cache()
             print(result)
         elif action == 'upload':
             result = upload_from_file(filepath, model)
