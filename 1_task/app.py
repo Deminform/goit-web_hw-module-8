@@ -6,6 +6,7 @@ import sys
 import redis
 from bson import ObjectId
 from redis_lru import RedisLRU
+from decorators import error_decorator
 
 from models import Author, Quote
 
@@ -39,6 +40,7 @@ author = arg.get('author')
 tags = arg.get('tags')
 
 
+@error_decorator
 def upload_from_file(filepath, model):
     result = []
     with open(filepath, 'r', encoding='utf-8') as file:
@@ -61,6 +63,7 @@ def upload_from_file(filepath, model):
     return result
 
 
+@error_decorator
 @cache
 def find_all(model):
     if model == 'author':
@@ -71,6 +74,7 @@ def find_all(model):
         return result if result else []
 
 
+@error_decorator
 @cache
 def find_by_name(argument):
     author_r = Author.objects(fullname__istartswith=argument.lower()).first()
@@ -79,6 +83,7 @@ def find_by_name(argument):
         return [r.quote for r in result]
 
 
+@error_decorator
 @cache
 def find_by_tag(argument):
     regex = re.compile(f'^{argument.lower()}.*')
@@ -86,12 +91,14 @@ def find_by_tag(argument):
     return [r.quote for r in result]
 
 
+@error_decorator
 @cache
 def find_by_tags(argument):
     result = Quote.objects(tags__in=argument).all()
     return [r.quote for r in result]
 
 
+@error_decorator
 def create(model, fullname='', born_date='', born_location='', description='', quote='', author='', tags=''):
     if model == 'author':
         result = Author(fullname=fullname,
@@ -108,6 +115,7 @@ def create(model, fullname='', born_date='', born_location='', description='', q
             return result
 
 
+@error_decorator
 def update(pk, model, fullname='', born_date='', born_location='', description='', quote='', author='', tags=''):
     if model == 'author':
         obj = Author.objects(id=pk).first()
@@ -126,6 +134,7 @@ def update(pk, model, fullname='', born_date='', born_location='', description='
             return result if result else None
 
 
+@error_decorator
 def delete(pk, model):
     obj = None
     if model == 'author':
