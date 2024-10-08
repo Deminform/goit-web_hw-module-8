@@ -194,20 +194,25 @@ def main():
 
 def detach():
     while True:
-        command = input('Enter a command or type "exit" or keep empty to exit: ')
-        command, argument = command.split(':', 1) if len(command.split(':')) > 1 else exit(0)
-        match command:
-            case 'name':
-                result = find_by_name(argument.strip()) if argument else print('Please enter author name for search.')
-                print(result) if result else print('No results found for your request.')
-            case 'tag':
-                result = find_by_tag(argument.strip()) if argument else print('Enter text for search.')
-                print(result) if result else print('No results found for your request.')
-            case 'tags':
-                result = find_by_tags((argument.split(','))) if argument else print('Enter text for search.')
-                print(result) if result else print('No results found for your request.')
-            case 'exit':
-                break
+        command = input('\nEnter a command or type "exit" or keep empty to exit: ')
+
+        if ':' in command:
+            command, argument = command.split(':', 1)
+            match command:
+                case 'name':
+                    result = find_by_name(argument.strip()) if argument else print('Please enter author name for search.')
+                    print(result) if result else print('No results found for your request.')
+                case 'tag':
+                    result = find_by_tag(argument.strip()) if argument else print('Enter text for search.')
+                    print(result) if result else print('No results found for your request.')
+                case 'tags':
+                    result = find_by_tags((argument.split(','))) if argument else print('Enter text for search.')
+                    print(result) if result else print('No results found for your request.')
+        elif command == 'exit':
+            break
+        else:
+            print('Incorrect command')
+            continue
 
 
 if __name__ == '__main__':
