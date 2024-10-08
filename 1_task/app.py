@@ -3,15 +3,14 @@ import json
 import re
 import sys
 
-import redis
 from bson import ObjectId
 from redis_lru import RedisLRU
-from decorators import error_decorator
 
+from conf import connect
+from decorators import error_decorator
 from models import Author, Quote
 
-client = redis.StrictRedis(host="localhost", port=6379, password=None)
-cache = RedisLRU(client)
+cache = RedisLRU(connect.client)
 
 parser = argparse.ArgumentParser(description='Python Web / Homework / Module 8')
 parser.add_argument('-a', '--action', help='create, update, read, delete, upload', metavar='')
@@ -63,8 +62,8 @@ def upload_from_file(filepath, model):
     return result
 
 
-@error_decorator
 @cache
+@error_decorator
 def find_all(model):
     if model == 'author':
         result = Author.objects.all()
@@ -74,8 +73,8 @@ def find_all(model):
         return result if result else []
 
 
-@error_decorator
 @cache
+@error_decorator
 def find_by_name(argument):
     author_r = Author.objects(fullname__istartswith=argument.lower()).first()
     if author_r:
@@ -83,16 +82,16 @@ def find_by_name(argument):
         return [r.quote for r in result]
 
 
-@error_decorator
 @cache
+@error_decorator
 def find_by_tag(argument):
     regex = re.compile(f'^{argument.lower()}.*')
     result = Quote.objects(tags__iregex=regex).all()
     return [r.quote for r in result]
 
 
-@error_decorator
 @cache
+@error_decorator
 def find_by_tags(argument):
     result = Quote.objects(tags__in=argument).all()
     return [r.quote for r in result]
@@ -190,7 +189,7 @@ def main():
         else:
             print('Incorrect action')
     else:
-        print('Incorrect command\navailable actions: create, read, delete, --upload\navailable models: author, quote')
+        print('Incorrect command\navailable actions: create, read, delete, upload\navailable models: author, quote')
 
 
 def detach():
