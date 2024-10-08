@@ -12,4 +12,4 @@ class Author(Document):
 class Quote(Document):
     quote = StringField(required=True)
     author = ReferenceField(Author)
-    tags = ListField(required=True)
+    tags = ListField()
